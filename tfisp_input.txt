@@ -1,0 +1,19 @@
+# Sample TFISP problem instance 
+NUM_JOBS=5
+NUM_RESOURCES=3
+RESOURCE_COSTS=100.0,200.0,150.0
+
+JOBS: #job_id, start_time, end_time
+0, 10, 20
+1, 15, 25
+2, 30, 40
+3, 35, 45
+4, 5, 15
+
+DISQUALIFIED_RESOURCES:
+#job_id, resource_id
+0, 2
+1, 0
+1, 1
+2, 0
+3, 1
