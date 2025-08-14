@@ -9,10 +9,10 @@ import inspect
 import sys
 import traceback
 
-#from tfisp_solver import parser as input_parser
-#from tfisp_solver.qubo_formulator import build_qubo
-#from tfisp_solver.solvers import solver_registry
-
+from typing import Dict, Any
+from .qubo_formulator import build_qubo
+from .solvers import solver_registry
+from .parser import parse_input_file, build_conflict_matrix
  
 # Helper utilities (robust)
  
@@ -54,19 +54,6 @@ def job_get_times(job):
         return float(job[1]), float(job[2])
     except Exception:
         raise ValueError(f"Cannot extract start/end from job: {job}")
-
-def build_conflict_matrix_safe(jobs):
-    """Construct Oij: 1 when intervals overlap, 0 otherwise. Works with job tuple or object."""
-    n = len(jobs)
-    O = [[0] * n for _ in range(n)]
-    for i in range(n):
-        si, ei = job_get_times(jobs[i])
-        for j in range(i + 1, n):
-            sj, ej = job_get_times(jobs[j])
-            # overlap if i.start < j.end and j.start < i.end (strict overlap)
-            if (ei > sj) and (ej > si):
-                O[i][j] = O[j][i] = 1
-    return O
 
 def qubo_to_iterable(qubo):
     """
@@ -138,10 +125,10 @@ def qubo_to_iterable(qubo):
 def main(input_file, solvers_list, output_dir=None, config_file="config.json"):
     # Basic validation of input/config files
     if input_file is None:
-        print("[ERROR] --input is required.")
+        print("--input is required.")
         return # Use return instead of sys.exit(1) in notebook context
     if not os.path.isfile(input_file):
-        print(f"[ERROR] Input file does not exist: {input_file}")
+        print(f"Input file does not exist: {input_file}")
         return # Use return instead of sys.exit(1) in notebook context
 
     config = safe_load_json(config_file)
@@ -166,17 +153,17 @@ def main(input_file, solvers_list, output_dir=None, config_file="config.json"):
         resource_costs = {}
         jobs = []
         disqualified_pairs = []
-        print("[WARN] Using placeholder data for parsing due to missing tfisp_solver.parser")
+        print("Using placeholder data for parsing due to missing tfisp_solver.parser")
 
     except Exception as e:
-        print(f"[ERROR] Failed to parse input file '{input_file}': {e}")
+        print(f"Failed to parse input file '{input_file}': {e}")
         traceback.print_exc()
         return # Use return instead of sys.exit(1) in notebook context
 
     # extra sanity checks
     try:
         if num_jobs != len(jobs):
-            print(f"[WARN] Declared NUM_JOBS={num_jobs} but parsed {len(jobs)} job entries. Using parsed count.")
+            print(f"Declared NUM_JOBS={num_jobs} but parsed {len(jobs)} job entries. Using parsed count.")
             num_jobs = len(jobs)
     except Exception:
         pass
@@ -194,10 +181,10 @@ def main(input_file, solvers_list, output_dir=None, config_file="config.json"):
         # if hasattr(input_parser, "build_conflict_matrix"):
         #     conflict_matrix = input_parser.build_conflict_matrix(jobs)
         # else:
-        conflict_matrix = build_conflict_matrix_safe(jobs)
+        conflict_matrix = build_conflict_matrix(jobs)
     except Exception as e:
         print(f"[WARN] Could not build conflict matrix using parser: {e}. Falling back to safe builder.")
-        conflict_matrix = build_conflict_matrix_safe(jobs)
+        conflict_matrix = build_conflict_matrix(jobs)
 
     print("\nFormulating QUBO...")
     # Build qubo in a robust way depending on build_qubo signature
@@ -212,7 +199,7 @@ def main(input_file, solvers_list, output_dir=None, config_file="config.json"):
         #     "jobs": jobs,
         #     "disqualified_pairs": disqualified_pairs
         # }
-        # # pass conflict_matrix/config if function supports them
+        #  pass conflict_matrix/config if function supports them
         # if "conflict_matrix" in sig.parameters:
         #     kwargs["conflict_matrix"] = conflict_matrix
         # if "config" in sig.parameters:
@@ -362,7 +349,7 @@ def main(input_file, solvers_list, output_dir=None, config_file="config.json"):
                         f.write(repr(assignment) + "\n")
                 print(f"Saved result to: {result_path}")
             except Exception as e:
-                print(f"[WARN] Failed to save result file for solver '{solver_name}': {e}")
+                print(f" Failed to save result file for solver '{solver_name}': {e}")
 
             all_results[solver_name] = {
                 "cost": cost,
@@ -371,7 +358,7 @@ def main(input_file, solvers_list, output_dir=None, config_file="config.json"):
             }
 
         except Exception as e:
-            print(f"[!] Error while solving with '{solver_name}': {e}")
+            print(f" Error while solving with '{solver_name}': {e}")
             traceback.print_exc()
             continue
 
@@ -438,10 +425,10 @@ def main(input_file, solvers_list, output_dir=None, config_file="config.json"):
         except Exception as e:
             print(f"[WARN] Could not save performance report: {e}")
 
-# Example usage within Colab:
+
 # Define your input file and solvers here
-input_file = "/path/to/your/input.txt" # <--- CHANGE THIS
-solvers_list = "simulated_annealing,dwave_ocean" # <--- CHANGE THIS
+input_file = "\Users\EricSiqueira\Desktop\SIT\QuantumComputing\tfisp_solver\tfisp_input.txt" 
+solvers_list = "simulated_annealing,dwave_ocean" 
 
 # Run the main function
 main(input_file, solvers_list)

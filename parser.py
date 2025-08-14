@@ -88,14 +88,13 @@ def build_conflict_matrix(jobs: List[Job]) -> List[List[int]]:
         si, ei = jobs[i].start_time, jobs[i].end_time
         for j in range(i + 1, n):
             sj, ej = jobs[j].start_time, jobs[j].end_time
-            # Overlap if i.start < j.end and j.start < i.end
             if (ei > sj) and (ej > si):
                 O[i][j] = O[j][i] = 1
     return O
 
 if __name__ == '__main__':
     # Example usage with the provided tfisp_input.txt content
-    # Note: This block assumes the file is in the same directory for demonstration
+    # This block assumes the file is in the same directory for demonstration
     file_path = "tfisp_input.txt"
     if os.path.exists(file_path):
         num_jobs, num_resources, resource_costs, jobs, disqualified_pairs = parse_input_file(file_path)

@@ -12,9 +12,28 @@ def build_qubo(
     conflict_matrix: List[List[int]],
     config: Dict
 ) -> dimod.BinaryQuadraticModel:
+    
+    # Constraint Term - H_link_resource_usage) 
+    # Links resource usage (y_k) to job assignments (x_ik)
+    # Correct QUBO formulation for this constraint term is:
+    # H_link_resource_usage = P4 * sum_k [ M_k*y_k + sum_i(x_ik) - (M_k+1)*y_k*sum_i(x_ik) ]
+
+    for k in range(num_resources):
+        y_k_var = f'y_{k}'
+        
+        # Add linear terms
+        bqm.add_variable(y_k_var, P4 * M_k)
+        for i in range(num_jobs):
+            x_ik_var = f'x_{i}_{k}'
+            bqm.add_variable(x_ik_var, P4)
+        
+        # Add quadratic terms
+        for i in range(num_jobs):
+            x_ik_var = f'x_{i}_{k}'
+            bqm.add_interaction(x_ik_var, y_k_var, -P4 * (M_k + 1))
     """
-    Formulates the TFISP into a Binary Quadratic Model (BQM), which is a general
-    representation of a QUBO problem, using the dimod library.
+    Formulates TFISP into a Binary Quadratic Model (BQM), which is a general
+    representation of a QUBO problem, using dimod.
 
     Arguments used:
         num_jobs: The number of jobs (N).
@@ -68,7 +87,7 @@ def build_qubo(
         #     lagrange_multiplier=P1
         # )
         # Manual expansion of the squared term for clarity:
-        bqm.add_variable(None, P1)  # (1)^2 term, added as offset
+        bqm.add_variable(None, P1) 
         for k_outer in range(num_resources):
             x_ik_outer = f'x_{i}_{k_outer}'
             bqm.add_variable(x_ik_outer, -2 * P1)
@@ -114,7 +133,7 @@ def build_qubo(
         # We need to add the following linear and quadratic terms from the expansion of the provided formula
         # P4 * (sum_i x_ik - sum_i x_ik*y_k + M_k*y_k - M_k*y_k*sum_i x_ik)
         
-        # - sum_i x_ik*y_k
+        # sum_i x_ik*y_k
         for i in range(num_jobs):
             x_ik_var = f'x_{i}_{k}'
             bqm.add_interaction(x_ik_var, y_k_var, -P4)
@@ -122,7 +141,7 @@ def build_qubo(
         # M_k * y_k
         bqm.add_variable(y_k_var, P4 * M_k)
 
-        # - M_k * y_k * sum_i x_ik
+        # M_k * y_k * sum_i x_ik
         for i in range(num_jobs):
             x_ik_var = f'x_{i}_{k}'
             bqm.add_interaction(x_ik_var, y_k_var, -P4 * M_k)
