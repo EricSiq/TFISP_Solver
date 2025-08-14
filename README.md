@@ -4,14 +4,14 @@ A command-line tool for solving the **Tactical Fixed Interval Scheduling Problem
 
 ---
 
-## 📌 Overview
+## Overview
 
 TFISP Solver transforms scheduling problems — where tasks have fixed times and limited resources — into a **Quadratic Unconstrained Binary Optimization (QUBO)** problem.  
 It supports solvers ranging from **classical optimizers** like CPLEX and Gurobi to **quantum/hybrid** solvers like D-Wave.
 
 ---
 
-## 🌍 Real-World Applications
+## Real-World Applications
 
 - **Manufacturing** – Assign tasks to machines without overlaps, minimizing activation costs.  
 - **Healthcare** – Schedule surgeries in limited operating rooms without conflicts.  
@@ -21,7 +21,7 @@ It supports solvers ranging from **classical optimizers** like CPLEX and Gurobi 
 
 ---
 
-## ⚙ How It Works
+## How It Works
 
 1. **Problem Input** – Define jobs, resources, and constraints in a text file:
    ```txt
