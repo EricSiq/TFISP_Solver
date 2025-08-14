@@ -11,7 +11,7 @@ class BaseSolver(abc.ABC):
 
     This class defines the standard interface that every solver must implement
     (the 'solve' method). It also provides a shared utility for loading solver
-    configuration from a JSON file, as required by the system architecture[cite: 134, 135].
+    configuration from a JSON file, as required by the system architecture
     """
     def __init__(self, config_path: str):
         """
